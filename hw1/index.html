@@ -140,7 +140,7 @@ This produces smooth color gradients across the triangle. The screenshot below s
 Pixel sampling determines how a color is chosen from a texture image at UV coordinates. We interpolated UV coordinates using barycentric weights and sampled the texture using either nearest neighbor or bilinear interpolation.
 </p>
 <p>
-Nearest sampling selects the closest texel and is fast but blocky. Bilinear sampling blends the four neighboring texels, producing smoother transitions. While increasing the supersample rate improves geometric edge antialiasing of the triangle boundary, it does not address texture aliasing; bilinear sampling reduces blockiness by blending neighboring texels, which is why bilinear produces smoother texture detail than nearest sampling even at the same sample rate.
+Nearest sampling selects the closest texel and is fast but blocky. Bilinear sampling blends the four neighboring texels, producing smoother transitions. While increasing the supersample rate improves geometric edge antialiasing of the triangle boundary, it does not address texture aliasing; bilinear sampling reduces blockiness by blending neighboring texels, which is why bilinear produces smoother texture detail than nearest sampling even at the same sample rate. The difference between nearest and bilinear sampling is most visible along high contrast texture edges and thin features. Nearest sampling produces blocky discontinuities, while bilinear sampling blends adjacent texels, reducing sharp pixel boundaries. Increasing supersampling improves triangle edge quality but does not eliminate texture blockiness without bilinear filtering.
 </p>
 
 <h3>Screenshots</h3>
@@ -165,7 +165,7 @@ Nearest sampling selects the closest texel and is fast but blocky. Bilinear samp
 Level sampling determines which mipmap resolution should be used when textures are minified. We computed UV derivatives at (x, y), (x+1, y), and (x, y+1), scaled them by texture dimensions, and used the maximum magnitude to compute the mipmap level using log2.
 </p>
 <p>
-For L_ZERO, we always sampled level 0. For L_NEAREST, we rounded to the nearest integer mip level. For L_LINEAR, we interpolated between adjacent mip levels, implementing trilinear filtering. When the textured object becomes small on screen, the computed mip level increases, causing the renderer to sample from lower-resolution mip levels and reduce high-frequency aliasing.
+For L_ZERO, we always sampled level 0. For L_NEAREST, we rounded to the nearest integer mip level. For L_LINEAR, we interpolated between adjacent mip levels, implementing trilinear filtering. When the textured object becomes small on screen, the computed mip level increases, causing the renderer to sample from lower-resolution mip levels and reduce high-frequency aliasing. When using L_ZERO, distant textures exhibit aliasing because the full resolution texture is undersampled. L_NEAREST reduces aliasing by selecting a lower resolution mipmap level, though visible transitions may occur between levels. L_LINEAR further smooths these transitions by interpolating between mip levels, reducing popping artifacts. The cleanest result is achieved with L_NEAREST + P_LINEAR, which combines mipmap selection with bilinear filtering.
 </p>
 
 <h3>Tradeoffs</h3>
