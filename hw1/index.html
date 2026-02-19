@@ -60,7 +60,7 @@ To rasterize a triangle, we first compute its axis-aligned bounding box in scree
 Within this bounding box, we iterate over every integer pixel coordinate. For each pixel at (x, y), we evaluate a single sample located at the pixel center, (x + 0.5, y + 0.5), following the specification that sample positions lie at half-integer coordinates.
 </p>
 <p>
-To determine whether the sample lies inside the triangle, we use edge functions. For each directed edge, we compute a signed area using a 2D cross product between the edge vector and the vector from the edge’s first vertex to the sample point. If all three edge values are non-negative or all are non-positive, the sample lies inside the triangle or on its boundary. Because we check for consistent sign rather than assuming vertex order, the implementation works for both clockwise and counterclockwise triangles.
+To determine whether the sample lies inside the triangle, we use edge functions. For each directed edge, we compute a signed area using a 2D cross product between the edge vector and the vector from the edge’s first vertex to the sample point. If all three edge values are non-negative or all are non-positive, the sample lies inside the triangle or on its boundary. Because we check for consistent sign rather than assuming vertex order, the implementation works for both clockwise and counterclockwise triangles. The pixel inspector is centered on a thin triangle edge to clearly show aliasing artifacts at sample rate 1.
 </p>
 
 <h3>Why This Is Efficient</h3>
@@ -127,7 +127,7 @@ where α + β + γ = 1. The weights represent each vertex’s influence. We comp
 color = αc0 + βc1 + γc2
 </p>
 <p>
-This produces smooth color gradients across the triangle.
+This produces smooth color gradients across the triangle. The screenshot below shows svg/basic/test7.svg rendered at sample rate 1, demonstrating smooth color interpolation across the triangle.
 </p>
 
 <img src="screenshot_2-18_17-25-0.png" width="400px">
@@ -140,7 +140,7 @@ This produces smooth color gradients across the triangle.
 Pixel sampling determines how a color is chosen from a texture image at UV coordinates. We interpolated UV coordinates using barycentric weights and sampled the texture using either nearest neighbor or bilinear interpolation.
 </p>
 <p>
-Nearest sampling selects the closest texel and is fast but blocky. Bilinear sampling blends the four neighboring texels, producing smoother transitions.
+Nearest sampling selects the closest texel and is fast but blocky. Bilinear sampling blends the four neighboring texels, producing smoother transitions. While increasing the supersample rate improves geometric edge antialiasing of the triangle boundary, it does not address texture aliasing; bilinear sampling reduces blockiness by blending neighboring texels, which is why bilinear produces smoother texture detail than nearest sampling even at the same sample rate.
 </p>
 
 <h3>Screenshots</h3>
@@ -165,7 +165,7 @@ Nearest sampling selects the closest texel and is fast but blocky. Bilinear samp
 Level sampling determines which mipmap resolution should be used when textures are minified. We computed UV derivatives at (x, y), (x+1, y), and (x, y+1), scaled them by texture dimensions, and used the maximum magnitude to compute the mipmap level using log2.
 </p>
 <p>
-For L_ZERO, we always sampled level 0. For L_NEAREST, we rounded to the nearest integer mip level. For L_LINEAR, we interpolated between adjacent mip levels, implementing trilinear filtering.
+For L_ZERO, we always sampled level 0. For L_NEAREST, we rounded to the nearest integer mip level. For L_LINEAR, we interpolated between adjacent mip levels, implementing trilinear filtering. When the textured object becomes small on screen, the computed mip level increases, causing the renderer to sample from lower-resolution mip levels and reduce high-frequency aliasing.
 </p>
 
 <h3>Tradeoffs</h3>
